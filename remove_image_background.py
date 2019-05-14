@@ -1,12 +1,14 @@
+"""Depreciated. Check ProcessingTest.py file : more functionnal"""
 import numpy as np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import cv2
 import sys
 
-videoPath = "VideoTest.avi"
+path = "/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/"
+videoName = 'test_cam6.avi'
 IMG_START = 65 # numéro de l'image de départ
 # Create a video capture object to read videos
-cap = cv2.VideoCapture(videoPath)
+cap = cv2.VideoCapture(path + videoName)
 # récupération de la première frame
 FIRST_FRAME = cap.read()[1]
 cap.set(cv2.CAP_PROP_POS_FRAMES, 150)
@@ -23,4 +25,3 @@ fig, ax = plt.subplots()
 ax.imshow(thresh)
 
 plt.show()
-
