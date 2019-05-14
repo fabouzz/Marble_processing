@@ -22,7 +22,11 @@ while(True):
     # Our operations on the frame come here
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     fgmask = fgbg.apply(frame)
-    cv2.imshow('frame', fgmask)
+
+    # Lisser l'image pour enlever du bruit
+    thresh = cv2.erode(fgmask, None, iterations=2)
+    # thresh = cv2.dilate(thresh, None, iterations=4)
+    cv2.imshow('frame', thresh)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
