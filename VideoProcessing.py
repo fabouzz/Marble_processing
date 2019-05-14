@@ -6,6 +6,9 @@ path = "/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/"
 videoName = 'test_cam6.avi'
 cap = cv2.VideoCapture(path + videoName)
 
+filename = "VideoTest.avi"
+cap = cv2.VideoCapture(filename)
+
 # Background substractor MO2
 fgbg = cv2.createBackgroundSubtractorMOG2()
 

@@ -1,4 +1,6 @@
-"""Depreciated. Check ProcessingTest.py file : more functionnal"""
+"""
+Depreciated. Check ProcessingTest.py file : more functionnal
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
