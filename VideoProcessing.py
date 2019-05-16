@@ -27,6 +27,7 @@ while(True):
     # thresh = cv2.erode(fgmask, None, iterations=1)
     # thresh = cv2.dilate(thresh, None, iterations=4)
     cv2.imshow('frame', fgmask)
+    
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
