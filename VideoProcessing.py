@@ -27,7 +27,12 @@ while(cap.isOpened()):
     # Lisser l'image pour enlever du bruit
     # thresh = cv2.erode(fgmask, None, iterations=1)
     # thresh = cv2.dilate(thresh, None, iterations=4)
+<<<<<<< HEAD
     cv2.imshow('frame', thresh)
+=======
+    cv2.imshow('frame', fgmask)
+    
+>>>>>>> af791babaa567eb96c1198d92f678b6058353e9d
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
