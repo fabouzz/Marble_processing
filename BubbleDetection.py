@@ -1,7 +1,3 @@
-# USAGE
-# python detect_bright_spots.py --image images/lights_01.png
-
-# import the necessary packages
 from imutils import contours
 from skimage import measure
 import numpy as np
@@ -19,9 +15,11 @@ IMAGE = cv2.cvtColor(IMAGE, cv2.COLOR_BGR2GRAY)
 height, width = IMAGE.shape
 IMAGE = IMAGE[440:height, 330:700]
 
+# Lissage de l'image
 thresh = cv2.erode(IMAGE, None, iterations=2)
 thresh = cv2.dilate(thresh, None, iterations=4)
 
+# Limite coupure pour binariser l'image 
 LimThresh = 75
 for x in range(thresh.shape[0]):
     for y in range(thresh.shape[1]):
@@ -35,12 +33,12 @@ for x in range(thresh.shape[0]):
 
 contours, h = cv2.findContours(thresh, 1, 2)
 nb_bulles = len(contours)
+print(nb_bulles)
 
 thresh_rgb = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
 for cnt in contours:
   cv2.drawContours(thresh_rgb, [cnt], 0, (0, 0, 255), 2)
 
 if __name__ == "__main__":
-    cv2.imshow("original image", IMAGE)
     cv2.imshow("treated image", thresh_rgb)
     cv2.waitKey(0)
