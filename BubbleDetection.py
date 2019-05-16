@@ -5,6 +5,7 @@
 from imutils import contours
 from skimage import measure
 import numpy as np
+import scipy.ndimage
 import argparse
 import imutils
 import cv2
@@ -25,28 +26,9 @@ thresh = cv2.dilate(thresh, None, iterations=4)
 for x in range(thresh.shape[1]):
     for y in range(thresh.shape[0]):
         # Si pixel trop clair, il devient blanc
-        if thresh[y, x] > 70:
+        if thresh[y, x] > 60:
             thresh[y, x] = 255
-
-thresh = cv2.adaptiveThreshold(thresh, 255, 
-    cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 0)
-
-cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
- 		cv2.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
-center = None
-
-if len(cnts) > 0:
-    # find the largest contour in the mask, then use
-    # it to compute the minimum enclosing circle and
-    # centroid
-    c = max(cnts, key=cv2.contourArea)
-    ((x, y), radius) = cv2.minEnclosingCircle(c)
-    M = cv2.moments(c)
-    center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-    print(center)
 
 cv2.imshow("original image", IMAGE)
 cv2.imshow("treated image", thresh)
-
 cv2.waitKey(0)
