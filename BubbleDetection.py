@@ -17,18 +17,30 @@ IMAGE = cv2.cvtColor(IMAGE, cv2.COLOR_BGR2GRAY)
 
 # Récupération de la taille de l'image pour crop
 height, width = IMAGE.shape
-print(height, width)
-IMAGE = IMAGE[430:height, 0:width]
+IMAGE = IMAGE[440:height, 330:700]
 
 thresh = cv2.erode(IMAGE, None, iterations=2)
 thresh = cv2.dilate(thresh, None, iterations=4)
 
-for x in range(thresh.shape[1]):
-    for y in range(thresh.shape[0]):
+LimThresh = 75
+for x in range(thresh.shape[0]):
+    for y in range(thresh.shape[1]):
         # Si pixel trop clair, il devient blanc
-        if thresh[y, x] > 60:
-            thresh[y, x] = 255
+        if thresh[x, y] > LimThresh:
+            thresh[x, y] = 255
+        elif thresh[x, y] <= LimThresh:
+            thresh[x, y] = 0
+# =======
+# Fin du traitement de l'image
 
-cv2.imshow("original image", IMAGE)
-cv2.imshow("treated image", thresh)
-cv2.waitKey(0)
+contours, h = cv2.findContours(thresh, 1, 2)
+nb_bulles = len(contours)
+
+thresh_rgb = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
+for cnt in contours:
+  cv2.drawContours(thresh_rgb, [cnt], 0, (0, 0, 255), 2)
+
+if __name__ == "__main__":
+    cv2.imshow("original image", IMAGE)
+    cv2.imshow("treated image", thresh_rgb)
+    cv2.waitKey(0)
