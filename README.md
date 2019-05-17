@@ -18,3 +18,10 @@ L'objectif est de traiter les vidéos de mesures pour le projet bille afin de d�
 Début du projet: soustraction et filtrage de l'arrière-plan, plusieurs méthodes mises en place.
 Premier algorithme de détection des bulles: isolation sur une section d'image et comptage avec le module `cv2`
 Travail avec du machine learning pour la détection de la bille. Potentielle application pour la détection des bulles mais l'utilité pour la bille est d'éviter de la compter comme une bulle: après le filtrage c'est un simple rond noir sur l'image comme toutes les bulles.
+
+Piste pour le tracking: http://soft-matter.github.io/trackpy/v0.3.0/tutorial/custom-feature-detection.html
+
+## Détection sur une image fixe
+
+![Avant]{screen_bulles.png}
+![Après]{exampleimage.png}
