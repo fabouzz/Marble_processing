@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""."""
+"""Haar Editor."""
 import sys
 import cv2
 import os
