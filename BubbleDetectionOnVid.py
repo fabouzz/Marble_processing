@@ -7,7 +7,9 @@ import cv2
 path = "/media/mathieu/EHDD/videos_bille/"
 videoName = "mes_haut5_bille3_1.avi"
 cap = cv2.VideoCapture(path + videoName)
-cap.set(cv2.CAP_PROP_POS_FRAMES, 150)
+cap.set(cv2.CAP_PROP_POS_FRAMES, 240)
+
+fgbg = cv2.createBackgroundSubtractorKNN()
 while cap.isOpened():
     ret, frame = cap.read()
 
@@ -15,36 +17,25 @@ while cap.isOpened():
         IMAGE = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Récupération de la taille de l'image pour crop
         height, width = IMAGE.shape
-        heightMin = 370
+        heightMin = 440
         heightMax = height
         widthMin = 300
         widthMax = 860
 
         IMAGE_NEW = IMAGE[heightMin:heightMax, widthMin:widthMax]
-
+        thresh = IMAGE_NEW
         # Lissage de l'image
-        thresh = cv2.erode(IMAGE_NEW, None, iterations=2)
-        thresh = cv2.dilate(thresh, None, iterations=4)
-
-        # Limite de coupure pour binariser l'image 
-        # Traitement et application du filtre
-        # LimThresh = 90
-        # # Traitement du seuil pour toute l'image
-        # for x in range(thresh.shape[0]):
-        #     for y in range(thresh.shape[1]):
-        #         # Si pixel trop clair, il devient blanc
-        #         if thresh[x, y] > LimThresh:
-        #             thresh[x, y] = 255
-        #         elif thresh[x, y] <= LimThresh:
-        #             thresh[x, y] = 0
-        # =======
-        # Fin du traitement de l'image
-
+        # thresh = cv2.erode(IMAGE_NEW, None, iterations=2)
+        # thresh = cv2.dilate(thresh, None, iterations=4)
+        fgmask = fgbg.apply(thresh)
+        thresh = cv2.adaptiveThreshold(fgmask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                            cv2.THRESH_BINARY, 5, 2)
+        
         # Identification des contours
-        contours= cv2.findContours(thresh, 1, 2)
+        contours = cv2.findContours(thresh, 1, 2)
         cnts = imutils.grab_contours(contours)
         nb_bulles = len(cnts)
-
+        print(nb_bulles)
         # creating empty lists to save centers of each bubble
         xpos = []
         ypos = []
@@ -53,10 +44,13 @@ while cap.isOpened():
             # compute the center of the contour
             M = cv2.moments(c)
             # resize centers of the bubbles to fit original image
-            cX = int(M["m10"] / M["m00"]) + widthMin
-            cY = int(M["m01"] / M["m00"]) + heightMin
-            # Place a circle on the center of the bubble
-            cv2.circle(frame, (cX, cY), 3, (0, 0, 255), -1)
+            try:
+                cX = int(M["m10"] / M["m00"]) + widthMin
+                cY = int(M["m01"] / M["m00"]) + heightMin
+                # Place a circle on the center of the bubble
+                cv2.circle(frame, (cX, cY), 3, (0, 0, 255), -1)
+            except ZeroDivisionError:
+                pass
         
         cv2.imshow("output", frame)
         cv2.imshow("output2", thresh)
