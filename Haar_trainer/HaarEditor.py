@@ -9,8 +9,7 @@ import getpass
 import argparse
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from PyQt5.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout,
-                             QGridLayout, QSlider, QLineEdit, QPushButton)
+from PyQt5.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QGridLayout, QSlider, QLineEdit, QPushButton, QLabel)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -44,19 +43,19 @@ class GUI(QDialog):
         super(GUI, self).__init__()
         self.setWindowTitle("Haar Editor - " + args.create)
         # self.setGeometry(200, 200, 800, 700)
-
-        self.videoPath = '/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/'
-
+        self.haarPath = os.getcwd() + '/' + args.create
+        print(self.haarPath)
         self.objets()
         self.layout()
 
     def objets(self):
         """Define visual objets to place in GUI."""
-        self.filename = QLineEdit('/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/test_cam6')
+        self.filePath = QLineEdit('/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/test_cam6')
         self.load = QPushButton("Load")
         self.load.clicked.connect(self.Load)
 
         self.addNeg = QPushButton('Add neg frames')
+        self.addNeg.clicked.connect(self.addNegSample)
         self.negSlice = QLineEdit()
 
         self.addPos = QPushButton('Add pos frames')
@@ -74,13 +73,16 @@ class GUI(QDialog):
         self.Slider.setValue(0)
         self.Slider.valueChanged.connect(self.sliderUpdate)
 
+        # Création du label
+        self.statusLabel = QLabel(self)
+
     def layout(self):
         """GUI layout using previous objets."""
         MainLayout = QVBoxLayout()
 
         LoadLayout = QHBoxLayout()
         LoadLayout.addWidget(self.load)
-        LoadLayout.addWidget(self.filename)
+        LoadLayout.addWidget(self.filePath)
 
         AddLayout = QHBoxLayout()
         AddLayout.addWidget(self.addPos)
@@ -96,6 +98,7 @@ class GUI(QDialog):
         MainLayout.addLayout(AddLayout)
         MainLayout.addLayout(VidLayout)
         MainLayout.addWidget(self.Slider)
+        MainLayout.addWidget(self.statusLabel)
         self.setLayout(MainLayout)
 
     def sliderUpdate(self):
@@ -105,7 +108,7 @@ class GUI(QDialog):
 
     def Load(self):
         """."""
-        filename = self.filename.text()
+        filename = self.filePath.text()
         self.cvVideo = cv2.VideoCapture(filename + '.avi')  # Chargement video
         with open(filename + '.cih') as file:
             lines = file.readlines()
@@ -126,6 +129,24 @@ class GUI(QDialog):
         ax.set_xticks([])
         ax.set_yticks([])
         self.Canvas.draw()
+
+    def addNegSample(self):
+        """."""
+        slice = self.negSlice.text()
+        path = self.filePath.text()
+        filename = path.split('/')[-1]
+        cap = cv2.VideoCapture(path + '.avi')
+        fgbg = cv2.createBackgroundSubtractorKNN()
+        count = int(slice.split(':')[0])
+        while count <= int(slice.split(':')[-1]):
+            ret, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            fgmask = fgbg.apply(gray)
+            thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
+            cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), thresh)
+            count += 1
+        self.statusLabel.clear()
+        self.statusLabel.setText('Added {} frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
 
 
 if __name__ == '__main__':
