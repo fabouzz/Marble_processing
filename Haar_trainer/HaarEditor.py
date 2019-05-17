@@ -3,8 +3,10 @@
 """."""
 import sys
 import cv2
+import os
 import numpy as np
 import getpass
+import argparse
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout,
@@ -14,6 +16,25 @@ from PyQt5.QtGui import QIcon
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--create', help='Create a new Haar cascade in current directory.')
+# parser.add_argument('-m', '--modify', help='Modify an existing Haar cascade.', action='store_true')
+parser.add_argument('-d', '--delete', type=str, help='Delete an existing Haar cascade')
+args = parser.parse_args()
+
+
+# Création de la cascade
+def createHaar(haarName):
+    """Create a new haar cascade file."""
+    try:
+        currentDir = os.getcwd()
+        os.mkdir(currentDir + '/' + haarName)
+        os.makedirs(currentDir + '/' + haarName + '/neg')
+        os.makedirs(currentDir + '/' + haarName + '/pos')
+    except FileExistsError:
+        print('This file already exists')
+# def deleteHaar():
+
 
 class GUI(QDialog):
     """GUI class."""
@@ -21,7 +42,7 @@ class GUI(QDialog):
     def __init__(self):
         """GUI definition."""
         super(GUI, self).__init__()
-        self.setWindowTitle("Frame visualiser")
+        self.setWindowTitle("Haar Editor - " + args.create)
         # self.setGeometry(200, 200, 800, 700)
 
         self.videoPath = '/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/'
@@ -31,16 +52,21 @@ class GUI(QDialog):
 
     def objets(self):
         """Define visual objets to place in GUI."""
-        self.filename = QLineEdit('test_cam6')
-        self.load = QPushButton("Charger")
+        self.filename = QLineEdit('/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/test_cam6')
+        self.load = QPushButton("Load")
         self.load.clicked.connect(self.Load)
 
-        # Création des objets figure
+        self.addNeg = QPushButton('Add neg frames')
+        self.negSlice = QLineEdit()
+
+        self.addPos = QPushButton('Add pos frames')
+        self.posSlice = QLineEdit()
+
         # Figure contenant l'image de la vidéo
         self.figVid = Figure(dpi=100, tight_layout=True)
         self.Canvas = FigureCanvas(self.figVid)
+
         # Crétion du slider
-        # self.toolbarSpec = NavigationToolbar(self.canvasSpec, self)
         self.Slider = QSlider(Qt.Horizontal)
         self.Slider.setMinimum(1)
         self.Slider.setMaximum(100)
@@ -52,15 +78,23 @@ class GUI(QDialog):
         """GUI layout using previous objets."""
         MainLayout = QVBoxLayout()
 
-        TopLayout = QHBoxLayout()
-        TopLayout.addWidget(self.load)
-        TopLayout.addWidget(self.filename)
+        LoadLayout = QHBoxLayout()
+        LoadLayout.addWidget(self.load)
+        LoadLayout.addWidget(self.filename)
 
-        MidLayout = QHBoxLayout()
-        MidLayout.addWidget(self.Canvas)
+        AddLayout = QHBoxLayout()
+        AddLayout.addWidget(self.addPos)
+        AddLayout.addWidget(self.posSlice)
+        AddLayout.addWidget(self.addNeg)
+        AddLayout.addWidget(self.negSlice)
 
-        MainLayout.addLayout(TopLayout)
-        MainLayout.addLayout(MidLayout)
+        VidLayout = QHBoxLayout()
+        VidLayout.addWidget(self.Canvas)
+
+        MainLayout.addLayout(LoadLayout)
+        # MainLayout.addLayout(NegLayout)
+        MainLayout.addLayout(AddLayout)
+        MainLayout.addLayout(VidLayout)
         MainLayout.addWidget(self.Slider)
         self.setLayout(MainLayout)
 
@@ -72,8 +106,8 @@ class GUI(QDialog):
     def Load(self):
         """."""
         filename = self.filename.text()
-        self.cvVideo = cv2.VideoCapture(self.videoPath + filename + '.avi')  # Chargement video
-        with open(self.videoPath + filename + '.cih') as file:
+        self.cvVideo = cv2.VideoCapture(filename + '.avi')  # Chargement video
+        with open(filename + '.cih') as file:
             lines = file.readlines()
             for line in lines:
                 if line.startswith('Total Frame :'):
@@ -95,7 +129,9 @@ class GUI(QDialog):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    clock = GUI()
-    clock.show()
-    sys.exit(app.exec_())
+    if args.create:
+        createHaar(args.create)
+        app = QApplication(sys.argv)
+        clock = GUI()
+        clock.show()
+        sys.exit(app.exec_())
