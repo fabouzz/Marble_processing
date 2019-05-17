@@ -25,5 +25,7 @@ Piste pour le tracking: http://soft-matter.github.io/trackpy/v0.3.0/tutorial/cus
 
 ![Avant](images/screen_bulles.png)
 Image brut
+
+
 ![Après](images/exampleimage.png)
 Image après le traitement: les bulles détectées sont repérées par un point rouge
