@@ -7,6 +7,7 @@ import os
 import cv2
 os.system("clear")
 
+slice = '1:10'
 path = '/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/'
 video = 'mes_cam_bille1_2'
 
@@ -29,3 +30,7 @@ while count <= 10:
     ret2, thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)
     cv2.imwrite('imfold/{}.png'.format(count), frame)
     count += 1
+
+with open('test.txt', 'a') as writefile:
+    for ligne in range(3):
+        writefile.write('ligne{}\n'.format(ligne))
