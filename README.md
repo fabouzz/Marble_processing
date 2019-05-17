@@ -23,5 +23,5 @@ Piste pour le tracking: http://soft-matter.github.io/trackpy/v0.3.0/tutorial/cus
 
 ## Détection sur une image fixe
 
-![Avant]{screen_bulles.png}
-![Après]{exampleimage.png}
+![Avant](images/screen_bulles.png)
+![Après](images/exampleimage.png)
