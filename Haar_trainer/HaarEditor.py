@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""."""
+"""Haar Editor."""
 import sys
 import cv2
 import os
@@ -138,15 +138,18 @@ class GUI(QDialog):
         cap = cv2.VideoCapture(path + '.avi')
         fgbg = cv2.createBackgroundSubtractorKNN()
         count = int(slice.split(':')[0])
-        while count <= int(slice.split(':')[-1]):
-            ret, frame = cap.read()
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            fgmask = fgbg.apply(gray)
-            thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-            cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), thresh)
-            count += 1
-        self.statusLabel.clear()
-        self.statusLabel.setText('Added {} frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
+        with open(self.haarPath + '/bg.txt', "a") as writer:
+            while count <= int(slice.split(':')[-1]):
+                ret, frame = cap.read()
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                fgmask = fgbg.apply(gray)
+                thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
+                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), thresh)
+                count += 1
+                writer.write('neg/{}_{}.png\n'.format(filename, count - 1))
+
+            self.statusLabel.clear()
+            self.statusLabel.setText('Added {} frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
 
 
 if __name__ == '__main__':
