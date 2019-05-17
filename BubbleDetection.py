@@ -13,7 +13,12 @@ IMAGE = cv2.cvtColor(IMAGE, cv2.COLOR_BGR2GRAY)
 
 # Récupération de la taille de l'image pour crop
 height, width = IMAGE.shape
-IMAGE = IMAGE[440:height, 330:700]
+heightMin = 440
+heightMax = height
+widthMin = 330
+widthMax = 700
+
+IMAGE = IMAGE[heightMin:heightMax, widthMin:widthMax]
 
 # Lissage de l'image
 thresh = cv2.erode(IMAGE, None, iterations=2)
