@@ -28,7 +28,7 @@ def createHaar(haarName):
     try:
         currentDir = os.getcwd()
         os.mkdir(currentDir + '/' + haarName)
-        os.system('touch {}/{}/vec.txt'.format(currentDir, haarName))
+        os.system('touch {}/{}/annotations.txt'.format(currentDir, haarName))
         os.makedirs(currentDir + '/' + haarName + '/neg')
         os.makedirs(currentDir + '/' + haarName + '/pos')
     except FileExistsError:
@@ -51,17 +51,26 @@ class GUI(QDialog):
 
     def objets(self):
         """Define visual objets to place in GUI."""
+        # Création de la zone de texte fichier
         self.filePath = QLineEdit('/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/test_cam6')
+
+        # Crétion du bouton chargement
         self.load = QPushButton("Load")
         self.load.clicked.connect(self.Load)
 
+        # Création du bouton addNeg
         self.addNeg = QPushButton('Add neg frames')
         self.addNeg.clicked.connect(self.addNegSample)
         self.negSlice = QLineEdit('Start:End')
 
+        # Création du bouton addPos
         self.addPos = QPushButton('Add pos frames')
         self.addPos.clicked.connect(self.addPosSample)
         self.posSlice = QLineEdit('Start:End')
+
+        # Création du bouton Anotate vec file
+        self.anotateVec = QPushButton('Anotate Vec file')
+        self.anotateVec.clicked.connect(self.anotateVecFile)
 
         # Figure contenant l'image de la vidéo
         self.figVid = Figure(dpi=100, tight_layout=True)
@@ -77,6 +86,7 @@ class GUI(QDialog):
 
         # Création du label
         self.statusLabel = QLabel(self)
+        self.statusLabel.setText('Wilkommen, please load a video file before adding samples')
 
     def layout(self):
         """GUI layout using previous objets."""
@@ -95,12 +105,16 @@ class GUI(QDialog):
         VidLayout = QHBoxLayout()
         VidLayout.addWidget(self.Canvas)
 
+        BottomLayout = QHBoxLayout()
+        BottomLayout.addWidget(self.statusLabel)
+        BottomLayout.addWidget(self.anotateVec)
+
         MainLayout.addLayout(LoadLayout)
         # MainLayout.addLayout(NegLayout)
         MainLayout.addLayout(AddLayout)
         MainLayout.addLayout(VidLayout)
         MainLayout.addWidget(self.Slider)
-        MainLayout.addWidget(self.statusLabel)
+        MainLayout.addLayout(BottomLayout)
         self.setLayout(MainLayout)
 
     def sliderUpdate(self):
@@ -123,15 +137,17 @@ class GUI(QDialog):
 
     def Load(self):
         """."""
-        filename = self.filePath.text()
-        self.cvVideo = cv2.VideoCapture(filename + '.avi')  # Chargement video
-        with open(filename + '.cih') as file:
+        fileName = self.filePath.text()
+        self.cvVideo = cv2.VideoCapture(fileName + '.avi')  # Chargement video
+        with open(fileName + '.cih') as file:
             lines = file.readlines()
             for line in lines:
                 if line.startswith('Total Frame :'):
                     self.nFrames = int(line.split(' : ')[1])
         self.Slider.setMaximum(self.nFrames)
         self.plot()
+        self.statusLabel.clear()
+        self.statusLabel.setText('Loaded video {}.avi'.format(fileName.split('/')[-1]))
 
     def plot(self, pos=0):
         """."""
@@ -149,19 +165,21 @@ class GUI(QDialog):
         """."""
         slice = self.negSlice.text()
         path = self.filePath.text()
-        filename = path.split('/')[-1]
+        fileName = path.split('/')[-1]
         cap = cv2.VideoCapture(path + '.avi')
         # fgbg = cv2.createBackgroundSubtractorKNN()
+        print(int(slice.split(':')[0]))
         count = int(slice.split(':')[0])
         with open(self.haarPath + '/bg.txt', "a") as writer:
             while count <= int(slice.split(':')[-1]):
+                cap.set(cv2.CAP_PROP_POS_FRAMES, count)
                 ret, frame = cap.read()
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 # fgmask = fgbg.apply(gray)
                 # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), gray)
+                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(fileName, count), gray)
                 count += 1
-                writer.write('neg/{}_{}.png\n'.format(filename, count - 1))
+                writer.write('{}/neg/{}_{}.png\n'.format(self.haarPath, fileName, count - 1))
 
             self.statusLabel.clear()
             self.statusLabel.setText('Added {} neg frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
@@ -170,20 +188,27 @@ class GUI(QDialog):
         """."""
         slice = self.posSlice.text()
         path = self.filePath.text()
-        filename = path.split('/')[-1]
+        fileName = path.split('/')[-1]
         cap = cv2.VideoCapture(path + '.avi')
         # fgbg = cv2.createBackgroundSubtractorKNN()
         count = int(slice.split(':')[0])
         while count <= int(slice.split(':')[-1]):
+            cap.set(cv2.CAP_PROP_POS_FRAMES, count)
             ret, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # fgmask = fgbg.apply(gray)
             # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(filename, count), gray)
+            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(fileName, count), gray)
             count += 1
 
             self.statusLabel.clear()
             self.statusLabel.setText('Added {} pos frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
+
+    def anotateVecFile(self):
+        """."""
+        print(os.getcwd())
+        print(self.haarPath)
+        os.system('opencv_annotation -a={0}/annotations.txt -i={0}/pos/'.format(self.haarPath))
 
 
 if __name__ == '__main__':
