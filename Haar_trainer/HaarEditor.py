@@ -28,7 +28,7 @@ def createHaar(haarName):
     try:
         currentDir = os.getcwd()
         os.mkdir(currentDir + '/' + haarName)
-        os.system('touch {}/{}/annotations.txt'.format(currentDir, haarName))
+        os.system('touch {}/{}/annotations.vec'.format(currentDir, haarName))
         os.makedirs(currentDir + '/' + haarName + '/neg')
         os.makedirs(currentDir + '/' + haarName + '/pos')
     except FileExistsError:
@@ -184,9 +184,15 @@ class GUI(QDialog):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 # fgmask = fgbg.apply(gray)
                 # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(fileName, count), gray)
+                scalePercent = 50
+                width = int(gray.shape[1] * scalePercent / 100)
+                height = int(gray.shape[0] * scalePercent / 100)
+                dim = (width, height)
+                # resize image
+                resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
+                cv2.imwrite(self.haarPath + '/neg/{}_{}.jpeg'.format(fileName, count), gray)
                 count += 1
-                writer.write('{}/neg/{}_{}.png\n'.format(self.haarPath, fileName, count - 1))
+                writer.write('{}/neg/{}_{}.jpeg\n'.format(self.haarPath, fileName, count - 1))
 
             self.statusLabel.clear()
             self.statusLabel.setText('Added {} neg frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
@@ -205,7 +211,13 @@ class GUI(QDialog):
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # fgmask = fgbg.apply(gray)
             # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(fileName, count), gray)
+            scalePercent = 50
+            width = int(gray.shape[1] * scalePercent / 100)
+            height = int(gray.shape[0] * scalePercent / 100)
+            dim = (width, height)
+            # resize image
+            resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
+            cv2.imwrite(self.haarPath + '/pos/{}_{}.jpeg'.format(fileName, count), gray)
             count += 1
 
             self.statusLabel.clear()
@@ -213,21 +225,23 @@ class GUI(QDialog):
 
     def anotateVecFile(self):
         """."""
-        os.system('opencv_annotation -a={0}/annotations.txt -i={0}/pos/'.format(self.haarPath))
+        os.system('opencv_annotation -a={0}/annotations.vec -i={0}/pos/ ----maxWindowHeight=300 --resizeFactor=0.25'.format(self.haarPath))
 
     def trainCascade(self):
         """."""
         data = self.haarPath
-        vecFile = data + '/annotations.txt'
+        vecFile = data + '/annotations.vec'
         bgFile = data + '/bg.txt'
         numPos = len(os.listdir(data + '/pos/'))
         numNeg = len(os.listdir(data + '/neg/'))
-        numStages = 13
-        minHitRate = 0.999
-        maxFalseAlarmRate = 0.5
+        print(numPos)
+        print(numNeg)
+        numStages = '13'
+        minHitRate = '0.999'
+        maxFalseAlarmRate = '0.5'
         width = self.imWidth
         height = self.imHeight
-        os.system('opencv_traincascade -data={} -vec={} -bg={} -numPos={} -numNeg={} -numStages={} -minHitRate={} -maxFalseAlarmRate={} -w={} -h={}'.format(data, vecFile, bgFile, numPos, numNeg, numStages, minHitRate, maxFalseAlarmRate, width, height))
+        os.system('opencv_traincascade -data {} -vec {} -bg {} -numPos {} -numNeg {} -numStages {} -minHitRate {} -maxFalseAlarmRate {} -w {} -h {}'.format(data, vecFile, bgFile, numPos, numNeg, numStages, minHitRate, maxFalseAlarmRate, width, height))
 
 
 if __name__ == '__main__':
