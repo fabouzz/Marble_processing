@@ -28,6 +28,7 @@ def createHaar(haarName):
     try:
         currentDir = os.getcwd()
         os.mkdir(currentDir + '/' + haarName)
+        os.system('touch {}/{}/vec.txt'.format(currentDir, haarName))
         os.makedirs(currentDir + '/' + haarName + '/neg')
         os.makedirs(currentDir + '/' + haarName + '/pos')
     except FileExistsError:
@@ -56,10 +57,11 @@ class GUI(QDialog):
 
         self.addNeg = QPushButton('Add neg frames')
         self.addNeg.clicked.connect(self.addNegSample)
-        self.negSlice = QLineEdit()
+        self.negSlice = QLineEdit('Start:End')
 
         self.addPos = QPushButton('Add pos frames')
-        self.posSlice = QLineEdit()
+        self.addPos.clicked.connect(self.addPosSample)
+        self.posSlice = QLineEdit('Start:End')
 
         # Figure contenant l'image de la vidéo
         self.figVid = Figure(dpi=100, tight_layout=True)
@@ -106,6 +108,19 @@ class GUI(QDialog):
         self.plot(pos=self.Slider.value())
         # print(self.Slider.value())
 
+    def keyPressEvent(self, event):
+        """Keyboard navigation."""
+        if event.key() == Qt.Key_Right:
+            self.slider.setValue(self.slider.value() + 1)
+        elif event.key() == Qt.Key_Left:
+            self.slider.setValue(self.slider.value() - 1)
+        else:
+            # Eviter le crash de l'interface dans le cas d'un spam de touche
+            try:
+                self.keyPressEvent(self, event)
+            except TypeError:
+                pass
+
     def Load(self):
         """."""
         filename = self.filePath.text()
@@ -136,20 +151,39 @@ class GUI(QDialog):
         path = self.filePath.text()
         filename = path.split('/')[-1]
         cap = cv2.VideoCapture(path + '.avi')
-        fgbg = cv2.createBackgroundSubtractorKNN()
+        # fgbg = cv2.createBackgroundSubtractorKNN()
         count = int(slice.split(':')[0])
         with open(self.haarPath + '/bg.txt', "a") as writer:
             while count <= int(slice.split(':')[-1]):
                 ret, frame = cap.read()
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                fgmask = fgbg.apply(gray)
-                thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), thresh)
+                # fgmask = fgbg.apply(gray)
+                # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
+                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(filename, count), gray)
                 count += 1
                 writer.write('neg/{}_{}.png\n'.format(filename, count - 1))
 
             self.statusLabel.clear()
-            self.statusLabel.setText('Added {} frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
+            self.statusLabel.setText('Added {} neg frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
+
+    def addPosSample(self):
+        """."""
+        slice = self.posSlice.text()
+        path = self.filePath.text()
+        filename = path.split('/')[-1]
+        cap = cv2.VideoCapture(path + '.avi')
+        # fgbg = cv2.createBackgroundSubtractorKNN()
+        count = int(slice.split(':')[0])
+        while count <= int(slice.split(':')[-1]):
+            ret, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # fgmask = fgbg.apply(gray)
+            # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
+            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(filename, count), gray)
+            count += 1
+
+            self.statusLabel.clear()
+            self.statusLabel.setText('Added {} pos frames'.format(int(slice.split(':')[-1]) - int(slice.split(':')[0]) + 1))
 
 
 if __name__ == '__main__':
