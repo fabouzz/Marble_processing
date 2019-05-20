@@ -45,7 +45,6 @@ class GUI(QDialog):
         self.setWindowTitle("Haar Editor - " + args.create)
         # self.setGeometry(200, 200, 800, 700)
         self.haarPath = os.getcwd() + '/' + args.create
-        print(self.haarPath)
         self.objets()
         self.layout()
 
@@ -55,7 +54,7 @@ class GUI(QDialog):
         self.filePath = QLineEdit('/home/fabouzz/Cours/Projet_CMI_bille/mesuresBille/test_cam6')
 
         # Crétion du bouton chargement
-        self.load = QPushButton("Load")
+        self.load = QPushButton("Load video")
         self.load.clicked.connect(self.Load)
 
         # Création du bouton addNeg
@@ -71,6 +70,10 @@ class GUI(QDialog):
         # Création du bouton Anotate vec file
         self.anotateVec = QPushButton('Anotate Vec file')
         self.anotateVec.clicked.connect(self.anotateVecFile)
+
+        # Création du bouton train cascade
+        self.trainButton = QPushButton('Train cascade')
+        self.trainButton.clicked.connect(self.trainCascade)
 
         # Figure contenant l'image de la vidéo
         self.figVid = Figure(dpi=100, tight_layout=True)
@@ -108,6 +111,7 @@ class GUI(QDialog):
         BottomLayout = QHBoxLayout()
         BottomLayout.addWidget(self.statusLabel)
         BottomLayout.addWidget(self.anotateVec)
+        BottomLayout.addWidget(self.trainButton)
 
         MainLayout.addLayout(LoadLayout)
         # MainLayout.addLayout(NegLayout)
@@ -144,6 +148,10 @@ class GUI(QDialog):
             for line in lines:
                 if line.startswith('Total Frame :'):
                     self.nFrames = int(line.split(' : ')[1])
+                if line.startswith('Image Width : '):
+                    self.imWidth = int(line.split(' : ')[1])
+                if line.startswith('Image Height :'):
+                    self.imHeight = int(line.split(': ')[1])
         self.Slider.setMaximum(self.nFrames)
         self.plot()
         self.statusLabel.clear()
@@ -168,7 +176,6 @@ class GUI(QDialog):
         fileName = path.split('/')[-1]
         cap = cv2.VideoCapture(path + '.avi')
         # fgbg = cv2.createBackgroundSubtractorKNN()
-        print(int(slice.split(':')[0]))
         count = int(slice.split(':')[0])
         with open(self.haarPath + '/bg.txt', "a") as writer:
             while count <= int(slice.split(':')[-1]):
@@ -206,9 +213,21 @@ class GUI(QDialog):
 
     def anotateVecFile(self):
         """."""
-        print(os.getcwd())
-        print(self.haarPath)
         os.system('opencv_annotation -a={0}/annotations.txt -i={0}/pos/'.format(self.haarPath))
+
+    def trainCascade(self):
+        """."""
+        data = self.haarPath
+        vecFile = data + '/annotations.txt'
+        bgFile = data + '/bg.txt'
+        numPos = len(os.listdir(data + '/pos/'))
+        numNeg = len(os.listdir(data + '/neg/'))
+        numStages = 13
+        minHitRate = 0.999
+        maxFalseAlarmRate = 0.5
+        width = self.imWidth
+        height = self.imHeight
+        os.system('opencv_traincascade -data={} -vec={} -bg={} -numPos={} -numNeg={} -numStages={} -minHitRate={} -maxFalseAlarmRate={} -w={} -h={}'.format(data, vecFile, bgFile, numPos, numNeg, numStages, minHitRate, maxFalseAlarmRate, width, height))
 
 
 if __name__ == '__main__':
