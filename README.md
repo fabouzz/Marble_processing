@@ -13,7 +13,7 @@ L'objectif est de traiter les vidéos de mesures pour le projet bille afin de d�
 - Tracking de la bille: vitesse, position
 - Tracking automatique des bulles: nombre et oscillation
 
-## semaine du 13 au 17 mai
+## Semaine du 13 au 17 mai
 
 Début du projet: soustraction et filtrage de l'arrière-plan, plusieurs méthodes mises en place.
 Premier algorithme de détection des bulles: isolation sur une section d'image et comptage avec le module `cv2`
