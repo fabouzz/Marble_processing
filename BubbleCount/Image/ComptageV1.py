@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 # Read image
-I = cv2.imread('testfile.png', 0)
+I = cv2.imread('../images/screen_bulles.png', 0)
+I = I[400:620, 320:540]
 # Threshold
 IThresh = (I >= 118).astype(np.uint8)*255
 
@@ -17,7 +18,6 @@ stat = connectedComponentProps[2]
 maxArea = 0
 for label in range(connectedComponentProps[0]):
     cc = stat[label, :]
-    print(label)
     if cc[cv2.CC_STAT_AREA] > maxArea:
         maxArea = cc[cv2.CC_STAT_AREA]
         maxIndex = label
@@ -40,8 +40,10 @@ IThreshFill = np.logical_not(IThreshFill/255).astype(np.uint8)*255
 connectedComponentPropsFinal = cv2.connectedComponentsWithStats(IThreshFill, 8, cv2.CV_32S)
 NumberOfDrops = connectedComponentPropsFinal[0]
 
-cv2.imshow("oui", IThresh)
-cv2.imshow("ouiii", IThreshFill)
+print("Number of drops = " + str(NumberOfDrops))
+
+
+cv2.imshow("original", I)
+cv2.imshow("treated", IThreshFill)
 cv2.waitKey(0)
 # Print
-print("Number of drops = " + str(NumberOfDrops))

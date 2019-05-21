@@ -7,7 +7,6 @@ videoName = "mes_haut4_bille3_1.avi"
 
 # Playing video from file:
 cap = cv2.VideoCapture(path + videoName)
-print(cap)
 
 try:
     if not os.path.exists('data'):
