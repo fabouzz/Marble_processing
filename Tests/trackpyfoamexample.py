@@ -47,7 +47,6 @@ def preprocess_foam(img):
         img = ndimage.binary_dilation(img)
     return util.img_as_int(img)
 
-
 frames = pims.ImageSequence(os.path.join(datapath, prefix + '*.tif'), process_func=preprocess_foam)
 img_example = frames[id_example]
 
@@ -55,21 +54,28 @@ img_example = frames[id_example]
 label_image = skimage.measure.label(img_example)
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(12, 12))
 ax.imshow(img_example)
-for region in skimage.measure.regionprops(label_image, intensity_image=img_example):
-    # Everywhere, skip small and large areas
-    if region.area < 5 or region.area > 800:
-        continue
-    # Only black areas
-    if region.mean_intensity > 1:
-        continue
-    # On the top, skip small area with a second threshold
-    if region.centroid[0] < 260 and region.area < 80:
-        continue
-    # Draw rectangle which survived to the criterions
-    minr, minc, maxr, maxc = region.bbox
-    rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-                              fill=False, edgecolor='red', linewidth=1)
 
-    ax.add_patch(rect)
 
-    plt.show()
+features = pd.DataFrame()
+for num, img in enumerate(frames):
+    label_image = skimage.measure.label(img)
+    for region in skimage.measure.regionprops(label_image, intensity_image=img):
+        # Everywhere, skip small and large areas
+        if region.area < 5 or region.area > 800:
+            continue
+        # Only black areas
+        if region.mean_intensity > 1:
+            continue
+        # On the top, skip small area with a second threshold
+        if region.centroid[0] < 260 and region.area < 80: 
+            continue
+        # Store features which survived to the criterions
+        features = features.append([{'y': region.centroid[0],
+                                     'x': region.centroid[1],
+                                     'frame': num,
+                                     },])
+                                     
+tp.annotate(features[features.frame==id_example], img_example);
+
+
+plt.show()
