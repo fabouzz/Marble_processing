@@ -8,7 +8,7 @@ import numpy as np
 import imutils
 import cv2
 
-IMAGE_PATH = "screen_bulles.png"
+IMAGE_PATH = "images/screen_bulles.png"
 ORIG_IMAGE = cv2.imread(IMAGE_PATH)
 # Pour éviter d'avoir 3 channels RGB identiques
 IMAGE = cv2.cvtColor(ORIG_IMAGE, cv2.COLOR_BGR2GRAY)

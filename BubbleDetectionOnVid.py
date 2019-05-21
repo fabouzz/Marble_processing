@@ -36,7 +36,9 @@ while cap.isOpened():
                                             cv2.THRESH_BINARY, 15, 2)
 
             thresh = cv2.threshold(fgmask, 2, 255, cv2.THRESH_BINARY_INV)[1]
-        elif lissage == 2:
+
+
+        elif filtrage == 2:
             # Autre traitement de l'image
             # Lissage de l'image
             thresh = cv2.erode(IMAGE_NEW, None, iterations=2)
@@ -86,10 +88,8 @@ while cap.isOpened():
 
         if cv2.waitKey(200) & 0xFF == ord('q'):
             break
-
     else:
         break
-
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()

@@ -41,7 +41,7 @@ def preprocess_foam(img):
     # Apply thresholds
     block_size = 5
     img = filters.threshold_local(img, block_size)
-    threshold = 0.25
+    threshold = 0.30
     idx = img > img.max() * threshold
     idx2 = img < img.max() * threshold
     img[idx] = 0
@@ -52,26 +52,26 @@ def preprocess_foam(img):
     img = ndimage.binary_dilation(img)
     return util.img_as_int(img)
 
-# IMAGE_PATH = "../images/screen_bulles.png"
-# ORIG_IMAGE = cv2.imread(IMAGE_PATH, cv2.IMREAD_GRAYSCALE)
-# # Pour éviter d'avoir 3 channels RGB identiques
-# IMAGE = preprocess_foam(ORIG_IMAGE)
-# ORIG_IMAGE = crop(ORIG_IMAGE)
+IMAGE_PATH = "../images/screen_bulles.png"
+ORIG_IMAGE = cv2.imread(IMAGE_PATH, cv2.IMREAD_GRAYSCALE)
+# Pour éviter d'avoir 3 channels RGB identiques
+IMAGE = preprocess_foam(ORIG_IMAGE)
+ORIG_IMAGE = crop(ORIG_IMAGE)
 
-# fig, ax = plt.subplots(2, 1)
-# ax[0].imshow(ORIG_IMAGE, cmap='Greys_r')
-# ax[1].imshow(IMAGE, cmap='Greys')
-# plt.show()
+fig, ax = plt.subplots(1, 2)
+ax[0].imshow(ORIG_IMAGE, cmap='Greys_r')
+ax[1].imshow(IMAGE, cmap='Greys')
+plt.show()
 # ==========================================================
 
-fig, ax = plt.subplots()
-id_example = 200
-filepath = "/media/mathieu/EHDD/videos_bille/mes_haut5_bille2_2.avi"
+# fig, ax = plt.subplots()
+# id_example = 200
+# filepath = "/media/mathieu/EHDD/videos_bille/mes_haut5_bille2_2.avi"
 
-frames = pims.Video(filepath)
-frame_n = frames[id_example]
-frame = as_grey(frame_n)
-print(frame)
-ax.imshow(frame, cmap='Greys_r')
+# frames = pims.Video(filepath)
+# frame_n = frames[id_example]
+# frame = as_grey(frame_n)
+# print(frame)
+# ax.imshow(frame, cmap='Greys_r')
 
-plt.show()
+# plt.show()
