@@ -2,7 +2,30 @@ import cv2
 import imutils
 import numpy as np
 from imutils import contours
-from skimage import measure
+from scipy import ndimage
+from skimage import filters, morphology, util
+
+
+def preprocess_foam(img):
+    """
+    Apply image processing functions to return a binary image
+    """
+    # adapt to greyscale
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Apply thresholds
+    img = filters.threshold_local(img, 299)
+    threshold = 0.80
+    idx = img > img.max() * threshold
+    idx2 = img < img.max() * threshold
+    img[idx] = 0
+    img[idx2] = 255
+    # Dilatate to get a continous network
+    # of liquid films
+    n_dilat = 1
+    for _ in range(n_dilat):
+        img = ndimage.binary_dilation(img)
+    return util.img_as_int(img)
+
 
 path = "/media/mathieu/EHDD/videos_bille/"
 videoName = "mes_haut4_bille3_1.avi"
@@ -25,8 +48,15 @@ while cap.isOpened():
 
         IMAGE_NEW = IMAGE[heightMin:heightMax, widthMin:widthMax]
         thresh = IMAGE_NEW
-    # =======================================================
-
+    # ======================================================= #
+    #                       FILTRAGE                          # 
+    # ======================================================= #
+        thresh = preprocess_foam(thresh)
+        # thresh = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
+        # thresh = cv2.threshold(thresh, 127, 255, cv2.THRESH_BINARY)
+        # thresh = (np.asarray(thresh) / 128.498)
+        # thresh = np.asarray(thresh, dtype='int16')
+    # =========================================================
         # Identification des contours
         contours = cv2.findContours(thresh, 1, 2)
         cnts = imutils.grab_contours(contours)
@@ -35,9 +65,6 @@ while cap.isOpened():
         txtbulle = "bulles: " + str(nb_bulles)
         font = cv2.FONT_HERSHEY_SIMPLEX
         # creating empty lists to save centers of each bubble
-        xpos = []
-        ypos = []
-
 
         # loop over the contours
         for c in cnts:
