@@ -185,12 +185,12 @@ class GUI(QDialog):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 # fgmask = fgbg.apply(gray)
                 # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-                width = int(gray.shape[1] * self.scalePercent / 100)
-                height = int(gray.shape[0] * self.scalePercent / 100)
-                dim = (width, height)
-                # resize image
-                resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
-                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(fileName, count), resized)
+                # width = int(gray.shape[1] * self.scalePercent / 100)
+                # height = int(gray.shape[0] * self.scalePercent / 100)
+                # dim = (width, height)
+                # # resize image
+                # resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
+                cv2.imwrite(self.haarPath + '/neg/{}_{}.png'.format(fileName, count), gray)
                 count += 1
                 writer.write('{}/neg/{}_{}.png\n'.format(self.haarPath, fileName, count - 1))
 
@@ -211,12 +211,12 @@ class GUI(QDialog):
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # fgmask = fgbg.apply(gray)
             # thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[-1]
-            width = int(gray.shape[1] * self.scalePercent / 100)
-            height = int(gray.shape[0] * self.scalePercent / 100)
-            dim = (width, height)
-            # resize image
-            resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
-            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(fileName, count), resized)
+            # width = int(gray.shape[1] * self.scalePercent / 100)
+            # height = int(gray.shape[0] * self.scalePercent / 100)
+            # dim = (width, height)
+            # # resize image
+            # resized = cv2.resize(gray, dim, interpolation=cv2.INTER_AREA)
+            cv2.imwrite(self.haarPath + '/pos/{}_{}.png'.format(fileName, count), gray)
             count += 1
 
             self.statusLabel.clear()
@@ -233,7 +233,7 @@ class GUI(QDialog):
         bgFile = data + '/bg.txt'
         numPos = len(os.listdir(data + '/pos/'))
         numNeg = len(os.listdir(data + '/neg/'))
-        numStages = '5'
+        numStages = '10'
         minHitRate = '0.999'
         maxFalseAlarmRate = '0.5'
         width = self.imWidth
