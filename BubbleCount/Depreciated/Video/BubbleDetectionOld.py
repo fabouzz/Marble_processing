@@ -4,7 +4,6 @@ import numpy as np
 from imutils import contours
 from skimage import measure
 
-filtrage = 1
 path = "/media/mathieu/EHDD/videos_bille/"
 videoName = "mes_haut4_bille3_1.avi"
 cap = cv2.VideoCapture(path + videoName)
@@ -26,34 +25,17 @@ while cap.isOpened():
 
         IMAGE_NEW = IMAGE[heightMin:heightMax, widthMin:widthMax]
         thresh = IMAGE_NEW
-        if filtrage == 1:
+
         # Lissage de l'image
-            thresh = cv2.erode(IMAGE_NEW, None, iterations=2)
-            thresh = cv2.dilate(thresh, None, iterations=4)
-            fgmask = fgbg.apply(thresh)
-            thresh = cv2.threshold(fgmask, 17, 255, cv2.THRESH_BINARY_INV)[1]
-            thresh = cv2.adaptiveThreshold(fgmask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                                            cv2.THRESH_BINARY, 15, 2)
+        # fgmask = fgbg.apply(thresh)
+        thresh = cv2.threshold(thresh, 60, 255, cv2.THRESH_BINARY_INV)[1]
+        # thresh = cv2.adaptiveThreshold(thresh, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            #                               cv2.THRESH_BINARY, 55, 2)
 
-            thresh = cv2.threshold(fgmask, 2, 255, cv2.THRESH_BINARY_INV)[1]
+        # thresh = cv2.threshold(fgmask, 2, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.erode(thresh, None, iterations=1)
+        # thresh = cv2.dilate(thresh, None, iterations=2)
 
-
-        elif filtrage == 2:
-            # Autre traitement de l'image
-            # Lissage de l'image
-            thresh = cv2.erode(IMAGE_NEW, None, iterations=2)
-            thresh = cv2.dilate(thresh, None, iterations=4)
-
-            # Limite de coupure pour binariser l'image 
-            LimThresh = 90
-            # Traitement du seuil pour toute l'image
-            for x in range(thresh.shape[0]):
-                for y in range(thresh.shape[1]):
-                    # Si pixel trop clair, il devient blanc
-                    if thresh[x, y] > LimThresh:
-                        thresh[x, y] = 255
-                    elif thresh[x, y] <= LimThresh:
-                        thresh[x, y] = 0
     # =======================================================
 
         # Identification des contours
