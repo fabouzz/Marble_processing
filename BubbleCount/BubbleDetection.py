@@ -1,4 +1,5 @@
 import cv2
+import os
 import imutils
 import numpy as np
 from skimage import filters, morphology, util
@@ -16,10 +17,18 @@ class Bubble:
         self.videoName = videoName
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.beginFrame = beginFrame
-        self.cap = cv2.VideoCapture(self.datapath + self.videoName)
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.beginFrame)
+        
+        self.ImportVideo()
+
+    def ImportVideo(self):
+        if os.path.exists(self.datapath):
+            self.cap = cv2.VideoCapture(self.datapath + self.videoName)
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.beginFrame)
+        else: 
+            print("Directory not found")
         # fgbg = cv2.createBackgroundSubtractorKNN()
-        self.fgbg = cv2.createBackgroundSubtractorMOG2(history=15, varThreshold=3, detectShadows=True)
+        self.fgbg = cv2.createBackgroundSubtractorMOG2(history=1, varThreshold=30, detectShadows=False)
+
 
     def ImageProcessing(self, frame):
         # getting the image as greyscale
@@ -40,40 +49,39 @@ class Bubble:
 #                           FILTERS                                # 
 ####################################################################
     def BGFilterThreshold(self, frame):
-        IMAGE = self.ImageProcessing(frame)
-        fgmask = self.fgbg.apply(IMAGE)
+        frame = self.fgbg.apply(frame)
+        blockSize = 15
+        thresh = cv2.adaptiveThreshold(frame, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                           cv2.THRESH_BINARY_INV, blockSize, 2)
 
-        thresh = cv2.threshold(fgmask, 60, 255, cv2.THRESH_BINARY_INV)[1]
-        # thresh = cv2.adaptiveThreshold(thresh, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-            #                               cv2.THRESH_BINARY, 55, 2)
-
-        # thresh = cv2.threshold(fgmask, 2, 255, cv2.THRESH_BINARY_INV)[1]
         # Lissage de l'image
-        thresh = cv2.erode(thresh, None, iterations=1)
-        # thresh = cv2.dilate(thresh, None, iterations=2)
+        thresh = cv2.erode(thresh, None, iterations=2)
+        thresh = cv2.dilate(thresh, None, iterations=4)
         return thresh
 
-    def SmoothFiltering(self, img):
+    def SmoothFiltering(self, frame):
         """
         Apply image processing functions to return a binary image
         """
         # adapt to greyscale
         # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # Apply thresholds
-        img = filters.threshold_local(img, 299)
-        threshold = 0.4
-        idx = img > img.max() * threshold
-        idx2 = img < img.max() * threshold
-        img[idx] = 0
-        img[idx2] = 255
+        frame = filters.threshold_local(frame, 299)
+        threshold = 0.8
+        idx = frame > frame.max() * threshold
+        idx2 = frame < frame.max() * threshold
+        frame[idx] = 0
+        frame[idx2] = 255
         # Dilatate to get a continous network
         # of liquid films
         n_dilat = 1
         for _ in range(n_dilat):
-            img = ndimage.binary_dilation(img)
+             img = ndimage.binary_dilation(frame)
         # Problème de compatibilité avec cv2!!!!
         # inutilisable avec la détection d'objets de cv2
-        return util.img_as_int(img)
+        frame = util.img_as_ubyte(frame)
+        print(frame)
+        return frame
 
     def CustomFilter(self, frame):
         thresh = cv2.erode(frame, None, iterations=2)
@@ -104,7 +112,6 @@ class Bubble:
         return thresh
 
 
-
 # ====================================================
 
     def BubbleFinding(self, img):
@@ -131,16 +138,20 @@ class Bubble:
                 pass
         return xpos, ypos, txtframe, txtbulle
 
+
 if __name__ == '__main__':
     datapath = "/media/mathieu/EHDD/videos_bille/"
     filename = "mes_haut4_bille3_1.avi"
-    video = Bubble(datapath, filename, beginFrame=250)
+    video = Bubble(datapath, filename, beginFrame=400)
 
-    while video.cap.isOpened():
+    while True:
         ret, frame = video.cap.read()
 
         if ret:
-            treated_frame = video.BGFilterThreshold(frame)
+            crop_frame = video.ImageProcessing(frame)
+            # treated_frame = video.CustomFilter(crop_frame)
+            # treated_frame = video.BGFilterThreshold(crop_frame)
+            treated_frame = video.ManualThreshold(crop_frame)
             xpos, ypos, txtframe, txtbulle = video.BubbleFinding(treated_frame)
             
             for c in range(len(xpos)):
