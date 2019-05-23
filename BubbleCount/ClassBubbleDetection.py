@@ -72,6 +72,7 @@ class Bubble:
         for _ in range(n_dilat):
             img = ndimage.binary_dilation(img)
         # Problème de compatibilité avec cv2!!!!
+        # inutilisable avec la détection d'objets de cv2
         return util.img_as_int(img)
 
     def CustomFilter(self, frame):
