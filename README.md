@@ -24,6 +24,7 @@ Pour du traitement d'image, il s'agit tout d'abord d'identifier les outils mis Ã
 
 ## DÃ©tection sur une image fixe (exemple)
 
+<img src="images/screen_bulles.png" width="200" height="400" />
 ![Avant](images/screen_bulles.png | width=100)
 Image brut
 
