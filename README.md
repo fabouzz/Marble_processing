@@ -24,12 +24,10 @@ Pour du traitement d'image, il s'agit tout d'abord d'identifier les outils mis �
 
 ## Détection sur une image fixe (exemple)
 
-<img src="images/screen_bulles.png" width="200"/>
-![Avant](images/screen_bulles.png | width=100)
+<img src="images/screen_bulles.png" width="400"/>
 Image brut
 
-<img src="images/exampleimage.png" width="200"/>
-![Après](images/exampleimage.png | width=100)
+<img src="images/exampleimage.png" width="400"/>
 Image après le traitement: les bulles détectées sont repérées par un point rouge
 
 ## Détection de la bille avec du machine learning
