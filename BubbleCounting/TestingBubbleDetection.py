@@ -4,24 +4,33 @@ import imutils
 import numpy as np
 from skimage import filters, morphology, util
 from scipy import ndimage
-
 from BubbleDetection import *
 
 datapath = "/media/mathieu/EHDD/videos_bille/"
 filename = "mes_haut4_bille3_1.avi"
+# filename = 'mes_haut3_bille3_1.avi'
 video = Bubble(datapath, filename, beginFrame=500)
 
 while True:
     ret, frame = video.cap.read()
 
     if ret:
-        crop_frame = video.ImageProcessing(frame)
+        # heightMin = 440
+        # heightMax = 900
+        # widthMin = 350
+        # widthMax = 700
+        heightMin = 0
+        heightMax = 672
+        widthMin = 0
+        widthMax = 1024
+        crop_frame = video.ImageProcessing(frame, heightMin, heightMax, widthMin, widthMax)
         # treated_frame = video.CustomFilter(crop_frame)
         # treated_frame = video.BGFilterThreshold(crop_frame)
         treated_frame = video.SmoothFiltering(crop_frame, blockSize=11, threshold=0.25)
         # treated_frame = video.ManualThreshold(crop_frame)
         xpos, ypos, txtframe, txtbulle = video.BubbleFinding(treated_frame)
-        
+        # xpos, ypos, txtframe, txtbulle = video.TrackpyFinding(treated_frame)
+      
         for c in range(len(xpos)):
             cX = xpos[c] 
             cY = ypos[c]

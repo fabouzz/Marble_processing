@@ -1,7 +1,9 @@
 import cv2 as cv
+import trackpy as tp
 import os
 import imutils
 import numpy as np
+import pandas as pd
 from skimage import filters, morphology, util
 from scipy import ndimage
 
@@ -29,15 +31,14 @@ class Bubble:
         # fgbg = cv.createBackgroundSubtractorKNN()
         self.fgbg = cv.createBackgroundSubtractorMOG2(history=1, varThreshold=30, detectShadows=False)
 
-    def ImageProcessing(self, frame):
+    def ImageProcessing(self, frame, heightMin, heightMax, widthMin, widthMax):
+        """
+        Return a greyscaled and cropped image
+        """
         # getting the image as greyscale
         IMAGE = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         # Récupération de la taille de l'image pour crop
         # height, width = IMAGE.shape
-        heightMin = 440
-        heightMax = 900
-        widthMin = 350
-        widthMax = 700
         self.heightMin = heightMin
         self.widthMin = widthMin
 
@@ -128,6 +129,46 @@ class Bubble:
                 pass
         return xpos, ypos, txtframe, txtbulle
 
+    def TrackpyFinding(self, frame):
+        diam = 15
+        f = tp.locate(frame, diam, invert=True)
+        x_coord = f['x'].as_matrix(columns=None)
+        y_coord = f['y'].as_matrix(columns=None)
+        nb_bulles = len(x_coord)
+        txtframe = "frame: " + str(int(self.cap.get(cv.CAP_PROP_POS_FRAMES)))
+        txtbulle = "bulles: " + str(nb_bulles)
+
+        xpos = []
+        ypos = []
+        for c in range(len(x_coord)):
+            cX = int(round(x_coord[c])) + self.widthMin
+            cY = int(round(y_coord[c])) + self.heightMin
+            xpos.append(cX)
+            ypos.append(cY)
+        return xpos, ypos, txtframe, txtbulle
+
+# ====================================================
+
+    def Trajectory(self):
+        length = int(self.cap.get(cv.CAP_PROP_FRAME_COUNT))
+        nb_frame = length - self.beginFrame
+        frames = []
+        nb_frame = 300
+        for n in range(nb_frame):
+            frame = self.cap.read()
+            frames.append(frame)
+            print(n, '/', nb_frame)
+        # frames need to be a <Frames> object imported
+        # from an ImageSequence from pims
+        
+        f = tp.batch(frames, 20, minmass=100)
+        t = tp.link_df(f, 5, memory=3)
+        # Duration of trajectories that needs to be kept
+        traject_mintime = 50
+        t1 = tp.filter_stubs(t, traject_mintime)
+        return f, t, t1
+
+
 
 if __name__ == '__main__':
     datapath = "/media/mathieu/EHDD/videos_bille/"
@@ -141,9 +182,10 @@ if __name__ == '__main__':
             crop_frame = video.ImageProcessing(frame)
             # treated_frame = video.CustomFilter(crop_frame)
             # treated_frame = video.BGFilterThreshold(crop_frame)
-            treated_frame = video.ManualThreshold(crop_frame)
-            xpos, ypos, txtframe, txtbulle = video.BubbleFinding(treated_frame)
-            
+            treated_frame = video.SmoothFiltering(crop_frame)
+            # xpos, ypos, txtframe, txtbulle = video.BubbleFinding(treated_frame)
+            xpos, ypos, txtframe, txtbulle = video.TrackpyFinding(treated_frame)
+
             for c in range(len(xpos)):
                 cX = xpos[c]
                 cY = ypos[c]
