@@ -1,4 +1,4 @@
-# Marble_processing
+# Traitement d'image: détection d'éléments lors de la chute d'une bille dans un liquide 
 
 Ce repository regroupe différents outils de traitement d'images afin de traiter des mesures vidéo de chute de bille sur une surface liquide. Les outils développés comprennent la détection et l'identification de la position de la bille qui chute ainsi que la détection des bulles et de la cavité causée par la chute dans le liquide
 
