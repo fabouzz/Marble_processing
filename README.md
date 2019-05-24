@@ -16,11 +16,11 @@ L'objectif est de traiter les vidéos de mesures pour le projet bille afin de d�
 ## Outils développés
 
 Pour du traitement d'image, il s'agit tout d'abord d'identifier les outils mis à disposition par la communauté sur Python 3; il existe de nombreuses librairies:
-    - Numpy et Scipy (traitement d'image, filtrage)
-    - Skimage (filtrage d'image)
-    - Cv2 avec OpenCv (filtrage, tracking, machine learning et autres)
-    - Trackpy (librairie de tracking)
-        - Exemple pour des bulles de mousse: http://soft-matter.github.io/trackpy/v0.3.0/tutorial/custom-feature-detection.html
+- Numpy et Scipy (traitement d'image, filtrage)
+- Skimage (filtrage d'image)
+- Cv2 avec OpenCv (filtrage, tracking, machine learning et autres)
+- Trackpy (librairie de tracking)
+- Exemple pour des bulles de mousse: http://soft-matter.github.io/trackpy/v0.3.0/tutorial/custom-feature-detection.html
 
 ## Détection sur une image fixe (exemple)
 
