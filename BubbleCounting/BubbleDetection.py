@@ -160,7 +160,7 @@ class Bubble:
             print(n, '/', nb_frame)
         # frames need to be a <Frames> object imported
         # from an ImageSequence from pims
-        
+
         f = tp.batch(frames, 20, minmass=100)
         t = tp.link_df(f, 5, memory=3)
         # Duration of trajectories that needs to be kept
