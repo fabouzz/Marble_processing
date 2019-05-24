@@ -40,4 +40,4 @@ Une classe regroupant divers outils a été créée et s'intitule `BubbleDetecti
 
 ### Perspectives
 
-Améliorer les outils de filtrage et de détection: écrire l'évolution de position pour les bulles dans un fichier texte pour connaitre leur trajectoire et leur vitesse pour comparer avec l'étude paramétrique réalisée. Ajouter les outils de machine learning développés précédemment pour détecter les bulles plus finement.
+Améliorer les outils de filtrage et de détection: obtenir les trajectoires des bulles dans un fichier pour pouvoir tracer les trajectoires et/ou le champ de vitesse des bulles. Ces données pourraient être utiles afin de pouvoir les comparer avec les paramètres d'entrée de l'étude paramétrique réalisée. Une autre possibilité pourrait être d'ajouter les outils de machine learning développés précédemment pour détecter les bulles plus finement.
